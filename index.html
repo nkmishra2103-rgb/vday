@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Be My Valentine?</title>
+  <style>
+    :root{
+      --pink-50:#fff0f6;
+      --pink-100:#ffe3ee;
+      --pink-200:#ffb3d1;
+      --pink-300:#ff80b8;
+      --pink-400:#ff4d9f;
+      --pink-500:#ff1f86;
+      --ink:#3a0b23;
+      --card:#ffffffcc;
+      --shadow: 0 20px 60px rgba(58,11,35,.18);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 10% 10%, var(--pink-100), transparent 60%),
+        radial-gradient(1000px 700px at 90% 20%, var(--pink-200), transparent 55%),
+        radial-gradient(900px 700px at 40% 95%, var(--pink-100), transparent 55%),
+        linear-gradient(135deg, var(--pink-50), #fff);
+      overflow:hidden;
+      user-select:none;
+    }
+
+    .hearts{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.55;
+      filter: drop-shadow(0 8px 10px rgba(255,31,134,.12));
+    }
+
+    .wrap{
+      position:relative;
+      height:100%;
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+
+    .card{
+      position:relative;
+      width:min(720px, 92vw);
+      padding:40px 32px;
+      border-radius:28px;
+      background:var(--card);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,31,134,.12);
+      backdrop-filter: blur(10px);
+      text-align:center;
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size: clamp(22px, 2.8vw, 32px);
+      letter-spacing: -0.015em;
+      white-space: nowrap;
+    }
+
+    .shiny{
+      background: linear-gradient(120deg, #ff4d9f, #ffd1e8, #ff4d9f);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 3s linear infinite;
+      font-weight: 800;
+    }
+
+    @keyframes shine{ to{ background-position: 200% center; } }
+
+    p{
+      margin:0 0 26px;
+      font-size: clamp(14px, 1.6vw, 18px);
+      opacity:.85;
+    }
+
+    .btnRow{
+      position:relative;
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      align-items:center;
+      min-height:74px;
+    }
+
+    .btn{
+      border:0;
+      padding:14px 20px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:16px;
+      cursor:pointer;
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+      box-shadow: 0 10px 22px rgba(58,11,35,.12);
+    }
+    .btn:active{ transform: translateY(1px) scale(.99); }
+
+    .yes{
+      background: linear-gradient(180deg, var(--pink-400), var(--pink-500));
+      color:white;
+    }
+    .yes:hover{ transform: translateY(-2px) scale(1.02); filter:saturate(1.05); }
+
+    .no{
+      background: white;
+      color: var(--ink);
+      border: 2px solid rgba(255,31,134,.25);
+    }
+
+    .actions{ margin-top:18px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
+
+    .ghost{
+      background: rgba(255,255,255,.7);
+      color: var(--ink);
+      border: 2px solid rgba(255,31,134,.22);
+      box-shadow: 0 10px 22px rgba(58,11,35,.08);
+    }
+    .ghost:hover{ transform: translateY(-2px) scale(1.01); }
+
+    .view{ display:none; }
+    .view.active{ display:block; }
+
+    h2{
+      margin:0;
+      font-size: clamp(20px, 2.4vw, 28px);
+      letter-spacing: -0.02em;
+    }
+
+    /* Yes view */
+    .yayTitle{ text-align:center; }
+    .yaySub{ margin: 8px 0 16px; }
+    .memeWrap{
+      width:min(520px, 86vw);
+      margin: 0 auto 18px;
+      border-radius:22px;
+      overflow:hidden;
+      border:1px solid rgba(255,31,134,.16);
+      box-shadow: 0 18px 40px rgba(58,11,35,.12);
+      background: rgba(255,255,255,.75);
+    }
+    .meme{ width:100%; height:auto; display:block; }
+
+    /* Memories section */
+    .memSection{
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,31,134,.14);
+      display:grid;
+      place-items:center;
+      gap:14px;
+    }
+    .memHeader{ width:100%; text-align:left; }
+    .memSub{ margin:8px 0 0; font-size:14px; opacity:.8; }
+
+    /* Make the Yes view scrollable if needed */
+    #yesView{
+      max-height: 88vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .stackWrap{ position:relative; width:min(520px, 86vw); }
+    .stack{
+      position:relative;
+      height: 420px;
+      border-radius:22px;
+      overflow:visible;
+    }
+    .stackShadow{
+      position:absolute;
+      inset: 16px 10px -6px 10px;
+      border-radius:24px;
+      background: rgba(58,11,35,.06);
+      filter: blur(16px);
+      z-index:0;
+    }
+
+    .page{
+      position:absolute;
+      inset:0;
+      border-radius:22px;
+      background: rgba(255,255,255,.88);
+      border:1px solid rgba(255,31,134,.16);
+      box-shadow: 0 18px 40px rgba(58,11,35,.14);
+      overflow:hidden;
+      transform-origin: 20% 15%;
+      cursor:pointer;
+      z-index: 2;
+    }
+
+    /* Subtle paper-curl corner */
+    .page::before{
+      content:"";
+      position:absolute;
+      top:0;
+      right:0;
+      width:84px;
+      height:84px;
+      background: linear-gradient(135deg, rgba(255,255,255,0) 46%, rgba(255,31,134,.10) 64%, rgba(58,11,35,.10) 100%);
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+      opacity: .55;
+      pointer-events:none;
+      transform: translate(10px,-10px);
+      filter: blur(.2px);
+      transition: transform .25s ease, opacity .25s ease;
+    }
+    .page:hover::before{
+      transform: translate(6px,-6px) rotate(2deg);
+      opacity: .7;
+    }
+    
+    /* Slight lift on hover to emphasize the curl */
+    .page:hover{
+      box-shadow: 0 22px 52px rgba(58,11,35,.16);
+    }
+
+    .page::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      top:0;
+      height:22px;
+      background:
+        radial-gradient(14px 12px at 10px 100%, rgba(255,255,255,.88) 60%, transparent 61%) repeat-x;
+      background-size: 26px 22px;
+      filter: drop-shadow(0 2px 0 rgba(255,31,134,.10));
+      opacity:.9;
+    }
+
+    .pageInner{
+      position:absolute;
+      inset:0;
+      padding:18px;
+      display:grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap:12px;
+    }
+
+    .monthRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding-top: 10px;
+    }
+
+    .month{
+      font-weight:800;
+      letter-spacing:-0.02em;
+      font-size:18px;
+    }
+
+    .badge{
+      font-size:12px;
+      font-weight:800;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,31,134,.10);
+      border:1px solid rgba(255,31,134,.18);
+    }
+
+    .photo{
+      width:100%;
+      height:100%;
+      max-height:100%;
+      border-radius:18px;
+      object-fit:contain; /* Option B: show full image */
+      background: rgba(255,255,255,.55);
+      border:1px solid rgba(255,31,134,.16);
+    }
+
+    .caption{
+      margin: 2px 8px 0;
+      padding-bottom: 6px;
+      font-size: 14px;
+      font-weight: 750;
+      opacity: 0.82;
+      text-align: center;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .rot90{ transform: rotate(90deg); transform-origin: center; }
+    .rot90Wrap{ display:grid; place-items:center; overflow:hidden; border-radius:18px; min-height:0; }
+
+    .page:nth-child(1){ transform: translateY(0px) rotate(0deg); }
+    .page:nth-child(2){ transform: translateY(6px) rotate(-1deg); }
+    .page:nth-child(3){ transform: translateY(12px) rotate(1deg); }
+    .page:nth-child(4){ transform: translateY(18px) rotate(-1.4deg); }
+    .page:nth-child(5){ transform: translateY(24px) rotate(1.2deg); }
+
+    .page.tear{
+      pointer-events:none;
+      animation: tearAway .55s ease forwards;
+    }
+
+    @keyframes tearAway{
+      from{ transform: translateY(0px) rotate(0deg) scale(1); opacity:1; filter: blur(0px); }
+      to{ transform: translateY(54px) rotate(-9deg) scale(.98); opacity:0; filter: blur(1.5px); }
+    }
+
+    .journeyHint{ margin-top:16px; font-size:13px; opacity:.65; }
+
+    #confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index: 999;
+    }
+
+    .heart{
+      position:absolute;
+      width:14px;
+      height:14px;
+      transform: rotate(45deg);
+      background: rgba(255,31,134,.18);
+      border-radius: 4px;
+      animation: floatUp linear infinite;
+    }
+    .heart::before,
+    .heart::after{
+      content:"";
+      position:absolute;
+      width:14px;
+      height:14px;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .heart::before{ left:-7px; top:0; }
+    .heart::after{ left:0; top:-7px; }
+
+    @keyframes floatUp{
+      from{ transform: translateY(0) rotate(45deg); opacity:0; }
+      10%{ opacity:.9; }
+      to{ transform: translateY(-120vh) rotate(45deg); opacity:0; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .heart{ display:none; }
+      .btn{ transition:none; }
+      .shiny{ animation:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hearts" aria-hidden="true" id="hearts"></div>
+
+  <main class="wrap">
+    <!-- ASK VIEW -->
+    <section class="card view active" id="askView" aria-live="polite">
+      <p>I have a very important question…</p>
+      <h1>Will you be my Valentine, <span class="shiny">Meher</span>? 💖</h1>
+
+      <div class="btnRow" id="arena">
+        <button class="btn yes" id="yesBtn" type="button">Yes</button>
+        <button class="btn no" id="noBtn" type="button">No</button>
+      </div>
+    </section>
+
+    <!-- YES VIEW -->
+    <section class="card view" id="yesView" aria-live="polite">
+      <h2 class="yayTitle">Hehe 😼💗</h2>
+      <p class="yaySub">I knew you wouldn’t say no.</p>
+
+      <div class="memeWrap" aria-label="Cat kissing meme">
+        <img class="meme" alt="Two cute cats kissing" id="catMeme" />
+      </div>
+
+      
+<div class="memSection">
+        <button class="btn ghost" id="resetCalendarBtn" type="button">Restart memories</button>
+        <div class="memHeader">
+          <h2>My fav memories of us 💞</h2>
+          <p class="memSub">Tap the top page to tear it away and reveal the next month.</p>
+        </div>
+
+        <div class="stackWrap">
+          <div class="stack" id="pageStack" aria-label="Tear-away calendar"></div>
+          <div class="stackShadow" aria-hidden="true"></div>
+        </div>
+
+        
+      </div>
+    </section>
+  </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <script>
+    // --- Floating hearts background ---
+    (function makeHearts(){
+      const container = document.getElementById('hearts');
+      const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduced) return;
+
+      const count = 18;
+      for(let i=0;i<count;i++){
+        const h = document.createElement('div');
+        h.className = 'heart';
+        const left = Math.random()*100;
+        const delay = Math.random()*6;
+        const dur = 8 + Math.random()*10;
+        const size = 10 + Math.random()*14;
+        h.style.left = left+'vw';
+        h.style.bottom = (-10 - Math.random()*40)+'px';
+        h.style.animationDelay = delay+'s';
+        h.style.animationDuration = dur+'s';
+        h.style.width = size+'px';
+        h.style.height = size+'px';
+        h.style.background = `rgba(255, 31, 134, ${0.10 + Math.random()*0.20})`;
+        container.appendChild(h);
+      }
+    })();
+
+    // --- "No" button physics ---
+    const arena = document.getElementById('arena');
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+
+    noBtn.style.position = 'absolute';
+
+    let vx = 0;
+    let vy = 0;
+    let lastT = performance.now();
+    let activated = false;
+    let pointer = { x: null, y: null, inside: false };
+    let homeX = 0;
+    let homeY = 0;
+    let x = 0;
+    let y = 0;
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function arenaRect(){ return arena.getBoundingClientRect(); }
+
+    function syncInitial(){
+      const a = arenaRect();
+      const b = noBtn.getBoundingClientRect();
+      homeX = (a.width * 0.65) - (b.width/2);
+      homeY = (a.height * 0.5) - (b.height/2);
+      x = homeX;
+      y = homeY;
+      noBtn.style.left = x+'px';
+      noBtn.style.top = y+'px';
+    }
+
+    function bounds(){
+      const a = arenaRect();
+      const bw = noBtn.offsetWidth;
+      const bh = noBtn.offsetHeight;
+      return {
+        minX: 0,
+        minY: 0,
+        maxX: Math.max(0, a.width - bw),
+        maxY: Math.max(0, a.height - bh),
+      };
+    }
+
+    function setPos(nx, ny){
+      const b = bounds();
+      x = clamp(nx, b.minX, b.maxX);
+      y = clamp(ny, b.minY, b.maxY);
+      noBtn.style.left = x+'px';
+      noBtn.style.top = y+'px';
+    }
+
+    function pointerNearButton(){
+      if(!pointer.inside || pointer.x === null || pointer.y === null) return { near:false, dx:0, dy:0, dist:1, trigger:140 };
+      const cx = x + noBtn.offsetWidth/2;
+      const cy = y + noBtn.offsetHeight/2;
+      const dx = cx - pointer.x;
+      const dy = cy - pointer.y;
+      const dist = Math.max(1, Math.hypot(dx, dy));
+      const trigger = 140;
+      return { near: dist < trigger, dx, dy, dist, trigger };
+    }
+
+    function activateFromEvent(e){
+      if(activated) return;
+      activated = true;
+      const a = arenaRect();
+      const px = e.clientX - a.left;
+      const py = e.clientY - a.top;
+      pointer.x = px; pointer.y = py; pointer.inside = true;
+      const cx = x + noBtn.offsetWidth/2;
+      const cy = y + noBtn.offsetHeight/2;
+      const dx = cx - px;
+      const dy = cy - py;
+      const dist = Math.max(1, Math.hypot(dx, dy));
+      vx = (dx / dist) * 280;
+      vy = (dy / dist) * 220;
+    }
+
+    function tick(t){
+      const dt = Math.min(0.03, (t - lastT) / 1000);
+      lastT = t;
+
+      if(!activated){
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      const nearInfo = pointerNearButton();
+
+      const springK = 18;
+      const dampC = 10;
+      const repelStrength = 2400;
+
+      let ax = 0;
+      let ay = 0;
+
+      ax += -dampC * vx;
+      ay += -dampC * vy;
+
+      if(nearInfo.near){
+        const strength = (nearInfo.trigger - nearInfo.dist) / nearInfo.trigger;
+        ax += (nearInfo.dx / nearInfo.dist) * (repelStrength * strength);
+        ay += (nearInfo.dy / nearInfo.dist) * (repelStrength * strength);
+      } else {
+        ax += -springK * (x - homeX);
+        ay += -springK * (y - homeY);
+      }
+
+      vx += ax * dt;
+      vy += ay * dt;
+
+      let nx = x + vx * dt;
+      let ny = y + vy * dt;
+
+      const b = bounds();
+      const restitution = 0.82;
+      if(nx <= b.minX){ nx = b.minX; vx = Math.abs(vx) * restitution; }
+      if(nx >= b.maxX){ nx = b.maxX; vx = -Math.abs(vx) * restitution; }
+      if(ny <= b.minY){ ny = b.minY; vy = Math.abs(vy) * restitution; }
+      if(ny >= b.maxY){ ny = b.maxY; vy = -Math.abs(vy) * restitution; }
+
+      setPos(nx, ny);
+
+      const distHome = Math.hypot(x - homeX, y - homeY);
+      const speed = Math.hypot(vx, vy);
+      if(!nearInfo.near && distHome < 1.5 && speed < 6){
+        x = homeX; y = homeY;
+        vx = 0; vy = 0;
+        setPos(x, y);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    noBtn.addEventListener('pointerenter', (e)=> activateFromEvent(e));
+
+    arena.addEventListener('pointerenter', ()=>{ pointer.inside = true; });
+    arena.addEventListener('pointerleave', ()=>{ pointer.inside = false; pointer.x = null; pointer.y = null; });
+    arena.addEventListener('pointermove', (e)=>{
+      const a = arenaRect();
+      pointer.x = e.clientX - a.left;
+      pointer.y = e.clientY - a.top;
+    });
+
+    noBtn.addEventListener('pointerdown', (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      activateFromEvent(e);
+    });
+
+    // --- View routing ---
+    const askView = document.getElementById('askView');
+    const yesView = document.getElementById('yesView');
+    const backToAskBtn = document.getElementById('backToAskBtn');
+
+    function showView(which){
+      [askView, yesView].forEach(v => v.classList.remove('active'));
+      if(which === 'yes') yesView.classList.add('active');
+      else askView.classList.add('active');
+    }
+
+    backToAskBtn?.addEventListener('click', ()=> showView('ask'));
+
+    // --- Confetti ---
+    const confettiCanvas = document.getElementById('confetti');
+    const cctx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+
+    function resizeConfetti(){
+      if(!confettiCanvas || !cctx) return;
+      const dpr = window.devicePixelRatio || 1;
+      confettiCanvas.width = window.innerWidth * dpr;
+      confettiCanvas.height = window.innerHeight * dpr;
+      cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resizeConfetti();
+
+    function launchConfetti(ms=2600){
+      if(!confettiCanvas || !cctx) return;
+      const pieces = [];
+      const W = () => window.innerWidth;
+      const H = () => window.innerHeight;
+      const n = 420;
+
+      for(let i=0;i<n;i++){
+        const centerBurst = i < n*0.35;
+        const cx = W()*0.5;
+        const cy = H()*0.35;
+        const px = centerBurst ? (cx + (-120 + Math.random()*240)) : (Math.random()*W());
+        const py = centerBurst ? (cy + (-80 + Math.random()*160)) : (-30 - Math.random()*H()*0.2);
+        const speed = centerBurst ? (240 + Math.random()*380) : (180 + Math.random()*280);
+        const ang = centerBurst ? (Math.random()*Math.PI*2) : (Math.PI/2 + (-0.35 + Math.random()*0.7));
+
+        pieces.push({
+          x: px,
+          y: py,
+          vx: Math.cos(ang)*speed + (-40 + Math.random()*80),
+          vy: Math.sin(ang)*speed,
+          w: 6 + Math.random()*8,
+          h: 3 + Math.random()*6,
+          a: Math.random()*Math.PI*2,
+          va: -8 + Math.random()*16,
+          alpha: 0.35 + Math.random()*0.5,
+        });
+      }
+
+      const start = performance.now();
+
+      function draw(now){
+        const dt = Math.min(0.033, (now - (draw.last||now))/1000);
+        draw.last = now;
+
+        cctx.clearRect(0,0,W(),H());
+
+        for(const p of pieces){
+          p.vy += 720 * dt;
+          p.vx *= (1 - 0.10*dt);
+          p.vy *= (1 - 0.06*dt);
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.a += p.va * dt;
+
+          if(p.x < -40) p.x = W()+40;
+          if(p.x > W()+40) p.x = -40;
+
+          cctx.save();
+          cctx.translate(p.x, p.y);
+          cctx.rotate(p.a);
+          cctx.globalAlpha = p.alpha;
+          cctx.fillStyle = 'rgba(255, 31, 134, 1)';
+          cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          cctx.restore();
+        }
+
+        if(now - start < ms){
+          requestAnimationFrame(draw);
+        } else {
+          cctx.clearRect(0,0,W(),H());
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    // --- Memories pages (Sep 2025 → Jan 2026) ---
+    const pageStack = document.getElementById('pageStack');
+
+    function svgPlaceholder(label){
+      const svg = `<?xml version="1.0" encoding="UTF-8"?>
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ff4d9f" stop-opacity="0.24"/>
+              <stop offset="0.55" stop-color="#ffd1e8" stop-opacity="0.34"/>
+              <stop offset="1" stop-color="#ff1f86" stop-opacity="0.22"/>
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#g)"/>
+          <circle cx="980" cy="120" r="90" fill="#ff1f86" fill-opacity="0.08"/>
+          <circle cx="180" cy="680" r="140" fill="#ff1f86" fill-opacity="0.08"/>
+          <text x="60" y="120" font-family="ui-sans-serif, system-ui" font-size="64" font-weight="800" fill="#3a0b23" fill-opacity="0.85">${label}</text>
+          <text x="60" y="190" font-family="ui-sans-serif, system-ui" font-size="34" font-weight="700" fill="#3a0b23" fill-opacity="0.55">(Image not accessible)</text>
+          <text x="60" y="740" font-family="ui-sans-serif, system-ui" font-size="26" font-weight="700" fill="#3a0b23" fill-opacity="0.45">Check Drive sharing / link</text>
+        </svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    // Local assets (recommended): put files in ./assets and reference them here.
+    // Example structure:
+    //   assets/
+    //     sep-2025.jpg
+    //     oct-2025.jpg
+    //     nov-2025.jpg
+    //     dec-2025.jpg
+    //     jan-2026.jpg
+    //     more-memories.jpg
+    //     cat-kiss.gif
+    const months = [
+      {
+        label: 'September 2025',
+        img: 'assets/Sep 2025.jpeg',
+        caption: 'And kids, this is how i met your mother',
+        rotate: false,
+      },
+      {
+        label: 'October 2025',
+        img: 'assets/Oct.jpeg',
+        caption: 'First Diwali Together!!',
+        rotate: false,
+      },
+      {
+        label: 'November 2025',
+        img: 'assets/Nov.jpeg',
+        caption: 'When baking was a daily thing',
+        rotate: false,
+      },
+      {
+        label: 'December 2025',
+        img: 'assets/Dec.jpeg',
+        caption: 'First Christmas together',
+        rotate: false,
+      },
+      {
+        label: 'January 2026',
+        img: 'assets/Jan.jpeg',
+        caption: 'Snowy Day',
+        rotate: false,
+      },
+    ];
+
+    const moreMemoriesImg = 'assets/More Memories.jpeg';
+
+    function escapeHtml(s){
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderStack(){
+      // reset and rebuild the full stack
+
+      pageStack.innerHTML = '';
+      const order = [...months].reverse();
+
+      order.forEach((m, idx)=>{
+        const page = document.createElement('div');
+        page.className = 'page';
+        page.style.zIndex = String(10 + idx);
+
+        const safeCaption = escapeHtml(m.caption);
+        const fallback = svgPlaceholder(m.label);
+        const imgSrc = m.img || fallback;
+
+        page.innerHTML = `
+          <div class="pageInner">
+            <div class="monthRow">
+              <div class="month">${escapeHtml(m.label)}</div>
+              <div class="badge">Tap to tear</div>
+            </div>
+            ${m.rotate ? `
+              <div class="rot90Wrap">
+                <img class="photo rot90" referrerpolicy="no-referrer" alt="Favorite memory from ${escapeHtml(m.label)}" src="${imgSrc}"  onerror="this.onerror=null;this.src='${fallback}';" />
+              </div>
+            ` : `
+              <img class="photo" referrerpolicy="no-referrer" alt="Favorite memory from ${escapeHtml(m.label)}" src="${imgSrc}"  onerror="this.onerror=null;this.src='${fallback}';" />
+            `}
+            <div class="caption">${safeCaption}</div>
+          </div>
+        `;
+
+        pageStack.appendChild(page);
+      });
+
+      wireTopPage();
+    }
+
+    function wireTopPage(){
+      const pages = Array.from(pageStack.querySelectorAll('.page'));
+      const top = pages[pages.length - 1];
+      if(!top) return;
+
+      top.addEventListener('click', ()=>{
+        top.classList.add('tear');
+        top.addEventListener('animationend', ()=>{
+          top.remove();
+          wireTopPage();
+
+          if(pageStack.querySelectorAll('.page').length === 0){
+            const endFallback = svgPlaceholder('More memories coming');
+            pageStack.innerHTML = `
+              <div class="page" style="cursor:default;">
+                <div class="pageInner">
+                  <div class="monthRow">
+                    <div class="month">More memories coming</div>
+                    <div class="badge">More memories coming</div>
+                  </div>
+                  <img class="photo" referrerpolicy="no-referrer" alt="More memories coming" src="${moreMemoriesImg}" onerror="this.onerror=null;this.src='${endFallback}';" />
+                  <div class="caption">More memories coming</div>
+                </div>
+              </div>
+            `;
+          }
+        }, { once:true });
+      }, { once:true });
+    }
+
+    renderStack();
+
+    // Restart button: bring back all pages
+    const resetBtn = document.getElementById('resetCalendarBtn');
+    resetBtn?.addEventListener('click', ()=>{
+      renderStack();
+    });
+
+    // --- Cat kiss GIF (Tenor) ---
+    const catMeme = document.getElementById('catMeme');
+    (function setCatMeme(){
+      const fallbackSvg = `<?xml version="1.0" encoding="UTF-8"?>
+      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff0f6"/>
+            <stop offset="0.6" stop-color="#ffe3ee"/>
+            <stop offset="1" stop-color="#ffb3d1"/>
+          </linearGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#3a0b23" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <rect width="1200" height="800" fill="url(#bg)"/>
+        <g filter="url(#shadow)">
+          <rect x="120" y="140" width="960" height="520" rx="28" fill="#ffffff" fill-opacity="0.78"/>
+        </g>
+        <text x="600" y="360" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="54" font-weight="900" fill="#3a0b23" fill-opacity="0.85">cat-kiss.gif missing</text>
+        <text x="600" y="430" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="30" font-weight="700" fill="#3a0b23" fill-opacity="0.55">Put it in assets/cat-kiss.gif</text>
+      </svg>`;
+
+      const FALLBACK = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(fallbackSvg)}`;
+      const TENOR_GIF = 'https://media.tenor.com/bvXwJ4I19ZQAAAAj/cat-cat-meme.gif';
+
+      catMeme.src = TENOR_GIF;
+      catMeme.onerror = () => { catMeme.src = FALLBACK; };
+    })();
+
+    // --- YES action ---
+    yesBtn.addEventListener('click', ()=>{
+      launchConfetti(2800);
+      setTimeout(()=>{ showView('yes'); }, 350);
+    });
+
+    // --- Minimal sanity tests (console) ---
+    function runSanityTests(){
+      const fails = [];
+      const check = (cond, msg) => { if(!cond) fails.push(msg); };
+
+      check(!!arena, 'arena exists');
+      check(!!noBtn && !!yesBtn, 'buttons exist');
+      check(!!askView && !!yesView, 'views exist');
+      check(!!pageStack, 'pageStack exists');
+      check(Array.isArray(months) && months.length === 5, 'months has 5 pages');
+      check(months.every(m => typeof m.img === 'string' && m.img.startsWith('assets/')), 'all month images use local assets paths');
+      check(typeof moreMemoriesImg === 'string' && moreMemoriesImg.startsWith('assets/'), 'moreMemoriesImg uses local assets path');
+      check(!!catMeme, 'catMeme element exists');
+      check(!!confettiCanvas, 'confetti canvas exists');
+
+      if(fails.length) console.warn('[Sanity tests] Issues:', fails);
+    }
+
+    runSanityTests();
+
+    // Init positioning + physics loop for the "No" button
+    syncInitial();
+    window.addEventListener('resize', ()=>{ resizeConfetti(); syncInitial(); });
+    requestAnimationFrame((t)=>{ lastT = t; requestAnimationFrame(tick); });
+  </script>
+</body>
+</html>
